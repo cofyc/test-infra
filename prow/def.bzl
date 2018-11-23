@@ -118,9 +118,9 @@ def tags(cmds, targets):
     # Create :YYYYmmdd-commitish :latest :latest-USER tags
     cmd_targets = {prefix(cmd): target(cmd) for cmd in cmds}
     cmd_targets.update({prefix(p): t for (p, t) in targets.items()})
-    if EDGE_PROW_REPO:
-        cmd_targets.update({edge_prefix(cmd): target(cmd) for cmd in cmds})
-        cmd_targets.update({edge_prefix(p): t for (p, t) in targets.items()})
+    # if EDGE_PROW_REPO:
+        # cmd_targets.update({edge_prefix(cmd): target(cmd) for cmd in cmds})
+        # cmd_targets.update({edge_prefix(p): t for (p, t) in targets.items()})
     return _image_tags(cmd_targets)
 
 def object(name, cluster = CORE_CLUSTER, **kwargs):
