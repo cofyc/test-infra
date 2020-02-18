@@ -111,7 +111,9 @@ func (d *deployer) Up() error {
 		args := []string{
 			"eks", "create", "config", "--path", d.configPath,
 		}
-		return process.Exec("aws-k8s-tester", args, os.Environ())
+		if err := process.Exec("aws-k8s-tester", args, os.Environ()); err != nil {
+			return err
+		}
 	}
 
 	args := []string{
