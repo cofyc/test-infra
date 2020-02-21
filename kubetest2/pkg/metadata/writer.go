@@ -33,8 +33,10 @@ type Writer struct {
 // NewWriter constructs a new writer, the junit_runner.xml contents
 // will be written to runnerOut, with the top level kubetest2 stages as
 // metadata (Up, Down, etc.)
-func NewWriter(runnerOut io.Writer) *Writer {
-	suite := testSuite{}
+func NewWriter(runnerOut io.Writer, suiteName string) *Writer {
+	suite := testSuite{
+		Name: suiteName,
+	}
 	return &Writer{
 		suite:     suite,
 		runnerOut: runnerOut,

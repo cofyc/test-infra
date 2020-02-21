@@ -57,6 +57,8 @@ type Options interface {
 	// returns the path to the directory where artifacts should be written
 	// (including metadata files like junit_runner.xml)
 	ArtifactsDir() string
+	// return the name of test suite
+	SuiteName() string
 }
 
 // Deployer defines the interface between kubetest and a deployer

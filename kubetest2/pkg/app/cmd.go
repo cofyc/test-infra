@@ -200,6 +200,7 @@ type options struct {
 	down      bool
 	test      string
 	artifacts string
+	suiteName string
 }
 
 // bindFlags registers all first class kubetest2 flags
@@ -210,6 +211,7 @@ func (o *options) bindFlags(flags *pflag.FlagSet) {
 	flags.BoolVar(&o.down, "down", false, "tear down the test cluster")
 	flags.StringVar(&o.test, "test", "", "test type to run, if unset no tests will run")
 	flags.StringVar(&o.artifacts, "artifacts", defaultArtifactsDir(), `directory to put artifacts, defaulting to "${ARTIFACTS:-./_artifacts}"`)
+	flags.StringVar(&o.suiteName, "suite-name", "kubetest2", "test suite name, defaults: kubetest2")
 }
 
 // assert that options implements deployer options
@@ -237,6 +239,10 @@ func (o *options) ShouldTest() bool {
 
 func (o *options) ArtifactsDir() string {
 	return o.artifacts
+}
+
+func (o *options) SuiteName() string {
+	return o.suiteName
 }
 
 // metadata used for CLI usage string

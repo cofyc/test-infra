@@ -65,7 +65,7 @@ func RealMain(opts types.Options, d types.Deployer, tester types.Tester) (result
 	if err != nil {
 		return errors.Wrap(err, "could not create runner output")
 	}
-	writer := metadata.NewWriter(junitRunner)
+	writer := metadata.NewWriter(junitRunner, opts.SuiteName())
 	// defer writing out the metadata on exit
 	// NOTE: defer is LIFO, so this should actually be the finish time
 	defer func() {
