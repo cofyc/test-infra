@@ -61,6 +61,7 @@ type deployer struct {
 	configPath     string // --config flag for kind create cluster
 	kubeconfigPath string // --kubeconfig flag for kind create cluster
 	verbosity      int    // --verbosity for kind
+	upRetries      int    // retries for up phase
 }
 
 // helper used to create & bind a flagset to the deployer
@@ -86,6 +87,9 @@ func bindFlags(d *deployer) *pflag.FlagSet {
 	)
 	flags.IntVar(
 		&d.verbosity, "verbosity", 0, "--verbosity flag for kind",
+	)
+	flags.IntVar(
+		&d.upRetries, "up-retries", 0, "retires for up phase",
 	)
 	return flags
 }
@@ -124,7 +128,19 @@ func (d *deployer) Up() error {
 
 	println("Up(): creating kind cluster...\n")
 	// we want to see the output so use process.ExecJUnit
-	return process.ExecJUnit("kind", args, os.Environ())
+	retries := d.upRetries
+	var err error
+	for {
+		err = process.ExecJUnit("kind", args, os.Environ())
+		if err == nil {
+			return nil
+		}
+		if retries <= 0 {
+			break
+		}
+		retries--
+	}
+	return err
 }
 
 func (d *deployer) Down() error {
