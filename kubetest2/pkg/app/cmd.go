@@ -25,6 +25,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
+	"k8s.io/component-base/version"
 	"k8s.io/test-infra/kubetest2/pkg/app/shim"
 	"k8s.io/test-infra/kubetest2/pkg/app/testers"
 	"k8s.io/test-infra/kubetest2/pkg/types"
@@ -143,6 +144,11 @@ func runE(
 		return nil
 	}
 
+	if opts.VersionRequested() {
+		cmd.Printf("%s-%s %s\n", shim.BinaryName, deployerName, version.Get())
+		return nil
+	}
+
 	// otherwise if we encountered any errors with the user input
 	// show the error / help, usage and then return
 	if parseError != nil {
@@ -195,6 +201,7 @@ func splitArgs(args []string) ([]string, []string) {
 // options holds flag values and implements deployer.Options
 type options struct {
 	help      bool
+	version   bool
 	build     bool
 	up        bool
 	down      bool
@@ -206,6 +213,7 @@ type options struct {
 // bindFlags registers all first class kubetest2 flags
 func (o *options) bindFlags(flags *pflag.FlagSet) {
 	flags.BoolVarP(&o.help, "help", "h", false, "display help")
+	flags.BoolVarP(&o.version, "version", "v", false, "display version information")
 	flags.BoolVar(&o.build, "build", false, "build kubernetes")
 	flags.BoolVar(&o.up, "up", false, "provision the test cluster")
 	flags.BoolVar(&o.down, "down", false, "tear down the test cluster")
@@ -219,6 +227,10 @@ var _ types.Options = &options{}
 
 func (o *options) HelpRequested() bool {
 	return o.help
+}
+
+func (o *options) VersionRequested() bool {
+	return o.version
 }
 
 func (o *options) ShouldBuild() bool {

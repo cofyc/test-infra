@@ -23,6 +23,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 
+	"k8s.io/component-base/version"
 	"k8s.io/test-infra/kubetest2/pkg/process"
 )
 
@@ -74,13 +75,18 @@ func runE(cmd *cobra.Command, args []string) error {
 
 	// gracefully handle -h or --help if it is the only argument
 	if len(args) == 1 {
-		// check for -h, --help
+		// check for -h, --help, -v, --version
 		flags := pflag.NewFlagSet(BinaryName, pflag.ContinueOnError)
 		help := flags.BoolP("help", "h", false, "")
+		versionFlag := flags.BoolP("version", "v", false, "")
 		// we don't care about errors, only if -h / --help was set
 		_ = flags.Parse(args)
 		if *help {
 			return cmd.Help()
+		}
+		if *versionFlag {
+			fmt.Printf("%s %s\n", BinaryName, version.Get())
+			os.Exit(0)
 		}
 	}
 

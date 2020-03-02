@@ -103,6 +103,7 @@ require (
 	k8s.io/apimachinery v0.17.2
 	k8s.io/client-go v11.0.1-0.20190805182717-6502b5e7b1b5+incompatible
 	k8s.io/code-generator v0.17.1
+	k8s.io/component-base v0.17.1
 	k8s.io/klog v1.0.0
 	k8s.io/utils v0.0.0-20191114184206-e782cd3c129f
 	knative.dev/pkg v0.0.0-20191111150521-6d806b998379
