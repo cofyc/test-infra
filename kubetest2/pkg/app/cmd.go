@@ -48,6 +48,8 @@ func NewCommand(deployerName string, newDeployer types.NewDeployer) *cobra.Comma
 			return runE(cmd, args, deployerName, newDeployer)
 		},
 	}
+	cmd.SetOut(os.Stdout)
+	cmd.SetErr(os.Stderr)
 	// we implement custom flag parsing below
 	cmd.DisableFlagParsing = true
 	return cmd
