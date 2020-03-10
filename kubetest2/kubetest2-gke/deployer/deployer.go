@@ -18,6 +18,7 @@ limitations under the License.
 package deployer
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -56,16 +57,13 @@ var (
 	// m[3]: unique hash (used as nonce for firewall rules)
 	poolRe = regexp.MustCompile(`zones/([^/]+)/instanceGroupManagers/(gke-.*-([0-9a-f]{8})-grp)$`)
 
-	urlRe           = regexp.MustCompile(`https://.*/`)
-	defaultNodePool = gkeNodePool{
-		Nodes:       3,
-		MachineType: "n1-standard-2",
-	}
+	urlRe = regexp.MustCompile(`https://.*/`)
 )
 
 type gkeNodePool struct {
 	Nodes       int
 	MachineType string
+	ExtraArgs   []string
 }
 
 type ig struct {
@@ -86,6 +84,8 @@ type deployer struct {
 	network           string
 	createCommandFlag string
 	gcpServiceAccount string
+	nodePoolsJSON     string
+	nodePools         map[string]gkeNodePool
 
 	kubecfgPath    string
 	gcpPrepared    bool
@@ -122,6 +122,13 @@ func (d *deployer) verifyFlags() error {
 	if _, err := d.location(); err != nil {
 		return err
 	}
+	err := json.Unmarshal([]byte(d.nodePoolsJSON), &d.nodePools)
+	if err != nil {
+		return fmt.Errorf("--node-pools must be valid JSON, unmarshal error: %v, JSON: %q", err, d.nodePoolsJSON)
+	}
+	if _, ok := d.nodePools[defaultPool]; !ok {
+		return fmt.Errorf("--node-pools must include a node pool named 'default', found %q", d.nodePools)
+	}
 	return nil
 }
 
@@ -156,6 +163,7 @@ func bindFlags(d *deployer) *pflag.FlagSet {
 	flags.StringVar(&d.region, "region", "", "For use with gcloud commands")
 	flags.StringVar(&d.zone, "zone", "", "For use with gcloud commands")
 	flags.StringVar(&d.stageLocation, "stage", "", "Upload binaries to gs://bucket/ci/job-suffix if set")
+	flags.StringVar(&d.nodePoolsJSON, "node-pools", `{"default":{"Nodes":3,"MachineType":"n1-standard-2"}}`, `A JSON description of node pools to create. The node pool 'default' is required and used for initial cluster creation. All node pools are symmetric across zones, so the cluster total node count is {total nodes in --gke-shape} * {1 + (length of --gke-additional-zones)}. Example: '{"default":{"Nodes":999,"MachineType:":"n1-standard-1"},"heapster":{"Nodes":1, "MachineType":"n1-standard-8", "ExtraArgs": []}}`)
 	return flags
 }
 
@@ -207,14 +215,16 @@ func (d *deployer) Up() error {
 	}
 	args := make([]string, len(d.createCommand()))
 	copy(args, d.createCommand())
+	def := d.nodePools[defaultPool]
 	args = append(args,
 		"--project="+d.project,
 		loc,
-		"--machine-type="+defaultNodePool.MachineType,
+		"--machine-type="+def.MachineType,
 		"--image-type="+image,
-		"--num-nodes="+strconv.Itoa(defaultNodePool.Nodes),
+		"--num-nodes="+strconv.Itoa(def.Nodes),
 		"--network="+d.network,
 	)
+	args = append(args, def.ExtraArgs...)
 	fmt.Printf("Environment: %v", os.Environ())
 
 	args = append(args, d.cluster)
