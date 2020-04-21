@@ -54,6 +54,8 @@ type Options interface {
 	ShouldDown() bool
 	// if this is true, kubetest2 will be calling tester.Test
 	ShouldTest() bool
+	// if this is true, kubetest2 will be calling deployer.DumpClusterLogs
+	ShouldDump() bool
 	// returns the path to the directory where artifacts should be written
 	// (including metadata files like junit_runner.xml)
 	ArtifactsDir() string

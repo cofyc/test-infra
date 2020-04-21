@@ -207,6 +207,7 @@ type options struct {
 	build     bool
 	up        bool
 	down      bool
+	dump      bool
 	test      string
 	artifacts string
 	suiteName string
@@ -219,6 +220,7 @@ func (o *options) bindFlags(flags *pflag.FlagSet) {
 	flags.BoolVar(&o.build, "build", false, "build kubernetes")
 	flags.BoolVar(&o.up, "up", false, "provision the test cluster")
 	flags.BoolVar(&o.down, "down", false, "tear down the test cluster")
+	flags.BoolVar(&o.dump, "dump", false, "dump cluster logs into artifacts directory")
 	flags.StringVar(&o.test, "test", "", "test type to run, if unset no tests will run")
 	flags.StringVar(&o.artifacts, "artifacts", defaultArtifactsDir(), `directory to put artifacts, defaulting to "${ARTIFACTS:-./_artifacts}"`)
 	flags.StringVar(&o.suiteName, "suite-name", "kubetest2", "test suite name, defaults: kubetest2")
@@ -249,6 +251,10 @@ func (o *options) ShouldDown() bool {
 
 func (o *options) ShouldTest() bool {
 	return o.test != ""
+}
+
+func (o *options) ShouldDump() bool {
+	return o.dump
 }
 
 func (o *options) ArtifactsDir() string {

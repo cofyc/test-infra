@@ -92,6 +92,11 @@ func RealMain(opts types.Options, d types.Deployer, tester types.Tester) (result
 
 	// ensure tearing down the cluster happens last, even if up or test fails.
 	defer func() {
+		if opts.ShouldDump() {
+			if err := writer.WrapStep("DumpClusterLogs", d.DumpClusterLogs); err != nil && result == nil {
+				result = err
+			}
+		}
 		if opts.ShouldDown() {
 			// TODO(bentheelder): instead of keeping the first error, consider
 			// a multi-error type
