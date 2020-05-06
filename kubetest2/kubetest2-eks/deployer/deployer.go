@@ -118,6 +118,7 @@ func (d *deployer) Up() error {
 
 	args := []string{
 		"eks", "create", "cluster",
+		"--enable-prompt=false",
 		"--path", d.configPath,
 	}
 
@@ -143,6 +144,7 @@ func (d *deployer) Down() error {
 
 	args := []string{
 		"eks", "delete", "cluster",
+		"--enable-prompt=false",
 		"--path", d.configPath,
 	}
 
